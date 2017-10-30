@@ -33,10 +33,12 @@
 \newcommand{\transp}{\dag}
 
 % create a framed margin note with colored frame and first word bold face 
-\newcommand{\glossarybox}[2]{\marginnote{\fcolorbox{cyan}{white}{\begin{minipage}{0.25\columnwidth}\scriptsize{\textbf{#1:} #2}\end{minipage}}}}
+\newcommand{\glossarybox}[2]{\marginnote{\setlength{\fboxrule}{2pt}\fcolorbox{cyan}{white}{\begin{minipage}{0.25\columnwidth}\scriptsize{\textbf{#1:} #2}\end{minipage}}}}
 
 \begin{document}
 
+\newgeometry{top=1.5cm, bottom=1.5cm, outer=2cm, inner=2cm, heightrounded, marginparwidth=1cm, marginparsep=0.8cm}
+\thispagestyle{empty}
 \begin{center}
 
 \vspace*{2cm}
@@ -60,82 +62,109 @@ Roc Boronat, 138\\
 
 \normalsize
 {Columbia University \\
-Italian Academy for Advanced Studies
+Italian Academy for Advanced Studies\\
 Center for Theoretical Neuroscience\\
 1161 Amsterdam Ave.\\
 New York NY 10027, USA} \\[1 cm]
 
-\end{center}
 
 \vfill
-Keywords:  machine-learning; classification; effective connectivity; functional connectivity; features selection; dimensionality reduction\\
 \today
+\end{center}
 
 
 \newpage
 %\linenumbers
 \doublespacing
 \begin{abstract}
-This is the abstract.
+In this article we give a general introduction to the study of cognitive functions and dysfunctions
+from the perspective of data science and network science.
+
+We will use functional magnetic resonance imaging data
+since it is a privileged method to observe whole brain activity in a non-invasive way. 
+
+The analysis of specific brain networks will provide a quantitative method to investigate the neural
+correlates of cognition and at the same time can be used to develop new diagnostic and therapeutic procedures
+for individual neuropsychiatric patients.
+
+The extraction of specific networks has to face the problem of a mixture of variability in brain activity. While
+extracting the network, for example, related to a given pathology, we want to assess the variability in this network between
+individual patients and filter out the variability due to repeated sampling.
+In order to face this problem we propose to simultaneously classify subjects and conditions (behavioral or pathologic).
+
+We base our classification pipeline on a network model of brain activity that enable us to extract the effective connectivity 
+between brain regions. In contrast to recent attempts to classify individuals based on functional connectivity, our approach
+provides more stable and reliable estimation of connectivity to the purpose of the classification.
+
+Here we show that our method is able to classify a large number of subjects using few recording sessions and at the same time the
+behavioral condition of the sessions (resting or movie viewing).
+In addition we extract the networks that underlie the two classifications: The subject network
+is almost fully connected with several central nodes, located in frontal and cingulate regions; in comparison, the
+condition network is segregated into small isolated components.
+
+Finally we discuss some refinements of our pipeline that are needed for small sampling size cases.
 \end{abstract}
 
 \newpage
 \tableofcontents
 \newpage
+\restoregeometry
 \section{Introduction}
 \label{intro}
+\marginnote{\setlength{\fboxrule}{2pt}\fcolorbox{cyan}{white}{\begin{minipage}{0.25\columnwidth}\centering\scriptsize{\textbf{\textcolor{cyan}{GLOSSARY}}}\end{minipage}}}
 
 This article is meant to be a general introduction to the study of cognitive functions and dysfunctions
 from the perspective of data science and network science.
 While the idea of the brain as the physical substrate of \emph{mental} activity is quite old and more or
 less well established and the idea of the brain as a network of interconnected units is, although not as old,
+\glossarybox{fMRI}{the activity of neurons is visualized through the
+induced magnetic field. Current spatial resolution of fMRI is in the order of
+mm, allowing to study large ensembles of neurons such as hypercolumns.}
 probably more widespread and shared, the study of whole brain networks underlying cognitive functions and brain disorders
 is only becoming possible very recently thanks to the acquisition of huge amount of data (often referred to as ``big data'')
 and to the development of adequate quantitative methods to analyze such data.
-\glossarybox{fMRI}{the activity of neurons is visualized through the
-induced magnetic field. Current spatial resolution of fMRI is in the order of
-mm, allowing to study large ensables of neurons such as hypercolumns.}
 The specific focus adopted here will be on estimating connectivity from functional magnetic resonance imaging (fMRI) data
 as a privileged method to observe whole brain activity in a non-invasive way. 
 However the extension to other type of data, such as calcium imaging, is straightforward.
 
-\textbf{Relevance of the project.}
+\textbf{Relevance.}
+\glossarybox{BOLD}{The activity of the brain requires oxygen. Oxygenated blood has different magnetic properties
+compared to de-oxygenated blood. These differences can be recorded by an fMRI scanner (the so called BOLD signal), thereby providing a proxy for the
+level of activity of each recorded brain region.}
 At least two research areas make our study of the utmost importance. On one side it will 
 provide a quantitative method to investigate the neural
 correlates of cognition at the level of whole brain networks, hence advancing our understanding
 of cognitive functions. On the other, it will foster the development of individualized medicine for
 neuropsychiatric diseases using imaging techniques, an idea that has been recently
 put forward \citep{yahata+kawato+computational_biomarkers+17}.
-\glossarybox{BOLD}{}
 
 \textbf{State-of-the-art.}
 Blood-oxygen-level dependent (BOLD) signals in fMRI have been used for more than two decades to observe human brain
-activity and relate it to functions [1,7].
-\glossarybox{FC}{Pattern of statistical association between brain areas. While structural connectivity
-represents the physical connections (the fibers) between areas, FC reflects the use of those physical connections when the brain is active.
-While structural connectivity remains the same even when the brain is dead, FC changes depending on the type of activity.}
+activity and relate it to functions \citep{amunts2014interoperable}.
 Even at rest, the brain exhibits
-patterns of correlated activity between distant areas [4,40]. The functional
+patterns of correlated activity between distant areas \citep{Biswal_MRM_1995}. The functional
 connectivity (FC) measures the statistical dependencies between the BOLD
 activities of brain regions, which has then been studied for subjects
 performing tasks and compared with the resting state. 
 Following fundamental discoveries about brain functions, fMRI
 has been increasingly used to complement clinical diagnostic for
-neuropathologies [33]. Resting-state fMRI has also been found to be informative
-about neuropsychiatric disorders [25]: alterations in FC correlate with and can
-predict the clinical scores of several diseases [30,41].
+neuropathologies \citep{Mantini_NatM_2012}. Resting-state fMRI has also been found to be informative
+about neuropsychiatric disorders \citep{gordon2017precision}: alterations in FC correlate with and can
+predict the clinical scores of several diseases \citep{rahim2017joint,kurth2015recognition}.
+\glossarybox{FC}{Pattern of statistical association between brain areas. While structural connectivity
+represents the physical connections (the fibers) between areas, FC reflects the use of those physical connections when the brain is active.
+While structural connectivity remains the same even when the brain is dead, FC changes depending on the type of activity.}
 
 Recent studies have focused on the reliability of these FC measures recorded
-from the same subject over successive sessions [44,37,6,38]. Consistent
+from the same subject over successive sessions \citep{pannunzi2017resting,mueller2015reliability}. Consistent
 differences between subjects (with individual stability) allow subject
-identification using recorded FC as a “fingerprint” [15]. Moreover, this
-subject specificity may even be enhanced in task-evoked activity [16]. Another
-model-based approach used linear-regression coefficients of BOLD signals
-instead of FC to identify the subjects [35]. A recent prospective study about
+identification using recorded FC as a “fingerprint” \citep{Filevich_BMC_2017}. Moreover, this
+subject specificity may even be enhanced in task-evoked activity \citep{finn2015functional}.
+A recent prospective study about
 the evolution of psychiatric disorders emphasized individual specificities in
-the FC stabilization during childhood (irrespective of the disease) [32],
+the FC stabilization during childhood (irrespective of the disease) \citep{kaufmann2017delayed},
 whereas traditional group-averaging aims to remove the individual differences
-to obtain task-specific [49] or pathology-specific [11] signatures.
+to obtain task-specific \citep{woo2017building} or pathology-specific \citep{deco2014great} signatures.
 
 \textbf{Anatomy of the problem.}
 We should now dissect the general problem prospected above (the study of whole brain networks
@@ -145,47 +174,46 @@ of session-to-session, subject-specific and condition-related variability in FC
 is a crucial issue in particular when only a few sessions per
 subject can be recorded, such as for clinical diagnostic. So the original problem
 can be translated into distinguishing these different sources of variability.
-\glossarybox{Classification}{In machine-learning is the task of predicting the category
-a new object belongs to, given previous examples of different objects and a categorical scheme. As an example,
-the spam filter of your email uses a classifier that categorizes incoming email in \emph{spam} and \emph{non-spam}.}
 In particular classifying subjects and conditions
 \footnote{We use the neutral word ``condition'' to indicate the condition a subject
-	might be in, be it a mental condition, e.g. dreaming, counting, visual exploration, or a
+might be in, be it mental, e.g. dreaming, counting, remembering, or a
 pathological/healthy condition.}
 would be a practical solution to this problem, since classifying both we would be filtering out the
 remaining session-to-session variability.
 
 \textbf{Approach towards a solution.}
+\glossarybox{Classification}{In machine-learning is the task of predicting the category
+a new object belongs to, given previous examples of different objects and a categorical scheme. As an example,
+the spam filter of your email uses a classifier that categorizes incoming email in \emph{spam} and \emph{non-spam}.}
 As already mentioned here we will take a whole brain approach.
 Distributed signatures in FC across the whole brain have been observed in
-memory tasks [42] or when the subject experiences psychological pain [5].
+memory tasks \citep{rissman2012distributed} or when the subject experiences psychological pain \citep{calhoun2017prediction}.
 Moreover, the etiology of many mental disorders is unknown: they are suspected
 to arise from network dysfunction, as reported for large-scale FC alterations
-in patients with schizophrenia [31]. These examples strongly point in favor of
-whole-brain approaches to study high-level cognition [9] and brain diseases
-[10]; in contrast, focusing on a few cortical areas only to test hypotheses
-[22,2] may not capture sufficient information and network effects. Such
+in patients with schizophrenia \citep{hoptman2012decreased}. These examples strongly point in favor of
+whole-brain approaches to study high-level cognition and brain diseases; in contrast, focusing on a few cortical areas only to test hypotheses
+may not capture sufficient information and network effects. Such
 whole-brain approaches typically involve a large number of parameters to
 estimate, which may impair the robustness. One aim of the present study is to
 provide a practical answer to this trade-off dilemma.
 
 The idea underlying the study of FC – in the broad sense – lies in that it
 reflects how brain areas dynamically bind to exchange and process information
-[18,28,3].
+\citep{Hipp_Nrn_2011,Betti_Nrn_2013}.
 \glossarybox{EC}{Although not a formally defined concept, it refers to the real connections employed by a network during its activity.
 In practice usually the parameters of a network model are adjusted in order to reproduce experimental data and the connectivity of the model
 is used as an estimation of EC.}
 To move beyond a phenomenological description of FC, our method
-relies on a mathematical network model of BOLD time series [20] and allow to FC to be decomposed into changes
+relies on a mathematical network model of BOLD time series \citep{Friston_BCon_2011} and allow to FC to be decomposed into changes
 in network connectivity, called effective connectivity (EC) and local fluctuating activity. As with FC, a crucial issue for EC is whether
 the estimated model parameters are reliable across several sessions for the
-same subject [17], which determines whether they can predict the subjects'
-identities in practice [35].
+same subject \citep{finn2017can}, which determines whether they can predict the subjects'
+identities in practice \citep{miranda2014connectotyping}.
 
 We will first develop the method for simultaneous subject and condition identification for simple conditions. In particular we will
 use a dataset where subjects can be in two conditions each during 4 minutes: resting or viewing a movie.
 We will then refine the method for its application to diverse conditions such as healthy/pathological states or short duration \emph{mental}
-states, such as memory retrival, visual exploration, working memory, decision-making, etc.
+states, such as memory retrieval, visual exploration, working memory, decision-making, etc.
 In particular we expect an increased complexity from short duration states.
 
 Summarizing, the steps towards the accomplishment of our objective are:
@@ -198,16 +226,16 @@ Summarizing, the steps towards the accomplishment of our objective are:
 \end{enumerate}
 
 
-\section{Results}
+\section{A new method for the extraction of networks related to subjective identity and condition}
 \label{results}
-The vast majority of the results presented here have been presented in a recent tecnical report available on Bioarxiv. 
-Here we will avoid a detailed description of methods (all necessary tecnical information will be presented together with the
-results) and we refer the reader to the tecnical report for a full description the procedures.
-
-\subsection{fMRI data}
+The vast majority of the results presented here have been presented in a recent technical report \citep{Pallares201624}. 
+Here we will avoid a detailed description of methods (all necessary technical information will be presented together with the
+results) and we refer the reader to the technical report for a full description the procedures.
 \glossarybox{PCC}{Measures the strength of linear statistical association between two variables. In the case where variable $x$ increases
 and variable $y$ increases PCC will be high and positive (with a maximum of 1), when $x$ increases and $y$ decreases PCC will be negative
 (with a minimum of -1). When the variables are not associated PCC will be 0 or very small.}
+
+\subsection{fMRI data}
 In this study we used fMRI data from the three datasets, where several subjects
 underwent multiple sessions of fMRI recording, as described in Table 1. 
 The processing of the data is represented in fig.\ref{fig:fig1}A.
@@ -219,6 +247,9 @@ ROI.
 Finally, as show in Fig.\ref{fig:fig1}A, we obtain an N×N symmetric matrix for each recorded session
 (N=116 for Datasets A and B, N=66 for Dataset C), where each element at row $i$ and column $j$ of the matrix represents the PCC
 between the $i$th ROI and the $j$th ROI. The matrix is symmetric since PCC is symmetric ($PCC(i, j) = PCC(j,i)$).
+\glossarybox{Mathematical model}{A set of differential equations that describe the evolution in time of
+some variables, possibly coupled, and their relationship to other static variables. Static variables can be
+determined by empirical measures or unknown, i.e. their value can be freely set.}
 
 \begin{table}[t!]
 	\centering
@@ -226,10 +257,10 @@ between the $i$th ROI and the $j$th ROI. The matrix is symmetric since PCC is sy
 Dataset name	& Acquisition	 & Number of subjects	 & Sessions per subject	 & Session duration \\
 \hline
 \hline
-Dataset A1	& Day2day project& 6			 & 40-50		 & 5 minutes \\
-Dataset A2	& Day2day project& 50 			 & 1			 & 5 minutes \\
-Dataset B	& CoRR		 & 30			 & 10			 & 10 minutes \\
-Dataset C	& \citep{}	 & 19			 & 3 resting; 2 movie	 & 10 minutes \\
+Dataset A1	& Day2day project				 & 6			 & 40-50		 & 5 minutes \\
+Dataset A2	& Day2day project				 & 50 			 & 1			 & 5 minutes \\
+Dataset B	& CoRR						 & 30			 & 10			 & 10 minutes \\
+Dataset C	& \citep{Gilson_NeIm_2017,Mantini_NatM_2012}	 & 19			 & 3 resting; 2 movie	 & 10 minutes \\
 \end{tabular}
 \caption{Datasets used in the study. Dataset A (A1+A2) was used to test the
 robustness of subject identification in session-to-session variability. Dataset
@@ -239,34 +270,25 @@ individualized and behavioral signatures.}
 \label{tab:parameters}	
 \end{table}
 
-\glossarybox{Mathematical model}{A set of differential equations that describe the evolution in time of
-different variable, possibly coupled, together with their relation to other static variables. Static variables can be
-determined by empirical measures or unknown, i.e. their value can be freely set. Typically models
-involve noise terms that make each realization of the process different from each other.}
 
 \subsection{Network model and effective connectivity extraction}
 
 The model is a network where each element, corresponding to each ROI, is
 is governed by an Ornestein-Uhlenbeck (OU) equation.
-To the aim of extracting the EC we used the whole-brain dynamic model [21] depicted in Figure 1B.
+To the aim of extracting the EC we used the whole-brain dynamic model \citep{Gilson_PCB_2016} depicted in Figure 1B.
 Each ROI receives input from other ROIs according to the connectivity scheme defined by the EC, which is estimated from the data.
+The model
+can be simulated and the FC of the model
 \glossarybox{Simulation}{The solution of the differential equations of a model that gives the evolution in time of the 
 variables of interest. Since (at least some) variables represent measurable quantities, the process \emph{simulates} the observable world.}
-The model can be simulated and the FC of the model can be compared to that of empirical data.
+can be compared to that of empirical data.
 In the model, the global pattern of FC arises from the
 local variability $\Sigma_i$ that propagates via the network connections $EC_{ij}$ (from $j$
 to $i$). 
-\glossarybox{Fitting}{Or ``parameter estimation'', is the adjustment of free variables of a model in order to make the simulation as close to
-the empirical data as possible.}
-\glossarybox{Inference}{When a model is fitted to experimental data (i.e. it can reproduce them to a certain extent), the value of free parameters
-can be inferred, e.g. in a network model the connectivity is typically not measurable but can be inferred once the model has been fitted.}
 To fit each fMRI session, all relevant $EC_{ij}$ and $\Sigma_i$ parameters are
 iteratively tuned such that the model FC best reproduces the
 empirical counterpart. A detailed description of the model and the
-maximum-likelihood estimation procedure is provided in \citep{}.
-\glossarybox{OU}{Is a mathematical model that describes the velocity of a Brownian motion, i.e.
-the motion of a random moving particle. In practice, the dynamic of the process tends toward an equilibrium but is
-otherwise noisy given the random fluctuations of its input. When multiple OU processes are connected complex dynamics can emerge.}
+maximum-likelihood estimation procedure is provided in \citep{Gilson_PCB_2016}.
 
 \begin{figure}[htpb]
 	\centering
@@ -287,24 +309,26 @@ the classification (density of 30\%).}
 \end{figure}
 
 \subsection{Subject identification}
+\glossarybox{Fitting}{Or ``parameter estimation'', is the adjustment of free variables of a model in order to make the simulation as close to
+the empirical data as possible.}
 
 Robust subject
-identification for $\sim$100 subjects was pioneered by a recent publication [16],
+identification for $\sim$100 subjects was pioneered by a recent publication \citep{finn2015functional},
 relying on a k-nearest-neighbor (kNN) classifier with k=1 and PCC as metric.
-In contrast with previous studies using 1NN [16,17,32], our method relies on a
+In contrast with previous studies using 1NN \citep{finn2015functional,finn2017can,kaufmann2017delayed}, our method relies on a
 multinomial logistic regression (MLR) classifier, a classical tool in machine
 learning. MLR uses a linear model to predict the probability that an input
 sample belongs to a class (subject here).
 
+\glossarybox{Inference}{When a model is fitted to experimental data (i.e. it can reproduce them to a certain extent), the value of free parameters
+can be inferred, e.g. in a network model the connectivity is typically not measurable but can be inferred once the model has been fitted.}
 In classification algorithms the problem of overfitting describes the situation
 where the algorithm performs very well with the data it is trained with, but
 fails to generalize to new samples. Due to the high dimensionality of the
-connectivity measures [29], it is essential to control for overfitting with an
+connectivity measures, it is essential to control for overfitting with an
 appropriate training and test procedure. Our train-test procedure and the use
-of large test-retest datasets – unlike previous studies [16,17,47] – aims to
+of large test-retest datasets – unlike previous studies \citep{finn2015functional,finn2017can,Vanderwal_NeIm_2017} – aims to
 provide a trustworthy characterization of the quality of the classifiers.
-\glossarybox{z-score}{Transformation of a distribution that allows to highlight the fluctuations of
-data around the mean.}
 Figure \ref{fig:fig2}A describes the train-test procedure for the identification of
 subjects: 1) fMRI sessions (EC in the figure) are randomly split in training
 and test datasets; 2) after preprocessing (orange arrows) involving
@@ -312,9 +336,11 @@ within-session z-score followed – or not – by PCA,
 the classifier is optimized as illustrated for the MLR with boundaries that
 best predict the training dataset; 3) test set is used to verify the
 generalization capability of the classifier (blue arrows), by measuring to
+\glossarybox{OU}{Is a mathematical model that describes the velocity of a Brownian motion, i.e.
+the motion of a random moving particle. In practice, the dynamic of the process tends toward an equilibrium but is
+otherwise noisy given the random fluctuations of its input. When multiple OU processes are connected complex dynamics can emerge.}
 which extent the classifier boundaries, estimated with the train set, correctly
 classify single sessions from the test set.
-\glossarybox{PCA}{Technique that allows to reduce the dimensionality of a dataset by rotating and projecting the data in a new space.}
 
 We first used Dataset A1 and increased the number of training sessions per
 subject from 1 to 40 to evaluate how many training sessions are necessary for
@@ -332,6 +358,8 @@ more robust than corrFC: while performance with corrFC rapidly deteriorates as
 the number of subjects is increased, classification using EC is barely affected
 by the number of subjects. This is our core technical result: EC and MLR
 largely outperform corrFC and 1NN, respectively.
+\glossarybox{z-score}{Transformation of a distribution that allows to highlight the fluctuations of
+data around the mean.}
 
 \begin{figure}[htpb]
 	\centering
@@ -359,6 +387,7 @@ characterizing the links that contribute to the classification. We used
 recursive feature elimination (RFE) to rank the links
 according to their weight in the classification and then chose the lowest
 number of links that achieved the maximum classification performance.
+\glossarybox{PCA}{Technique that allows to reduce the dimensionality of a dataset by rotating and projecting the data in a new space.}
 The resulting
 support network for dataset A1 had 18 links, compared to 44 links for dataset
 B. In both cases, subject identification using only those links achieved
@@ -390,6 +419,9 @@ corresponding amount of common links under the null-hypothesis (here p-value <
 	\label{fig:fig3}
 \end{figure}
 
+\glossarybox{Hypothesis testing}{To test a hypothesis, the opposite hypothesis, called null-hypothesis,
+is formulated, encompassing all possible cases but the one under test. The probability of a real measurement under the null-hypothesis
+is calculated and if it is very small (usually $<$ 0.05) the null-hypothesis is rejected.}
 The sparsity of the signature in Figure \ref{fig:fig3}A hides the fact that the rankings for
 Datasets A1 and B are close (PCC=0.59, p-value<<10-50), indicating that similar
 neural networks characterize individuals in two disjoint sets of subjects; see
@@ -486,20 +518,32 @@ for the 13 links supporting the classification between the two conditions.}
 	\label{fig:fig6}
 \end{figure}
 
-\section{Next step: dynamic EC extraction}
+\section{Refinements}
 \label{dynEC}
 
-Summarizing here we presented a reliable method to classify simultaneously subjects and conditions and to extract 
-the network underlying these classifications.
-To the aim of applying this method to the study of different cognitive functions we foresee some necessary adaptations.
+We presented a reliable method to classify simultaneously subjects and conditions and to extract 
+the networks underlying these classifications.
+To the aim of applying this method to the study of different cognitive functions and to the clinical domain some refinements are needed.
+
 The typical timespan of cognitive tasks is usually less than one minute (even few seconds for very stereotyped perceptual
-tasks). Our method is calibrated for fMRI sessions of few minutes. Even if experimental manipulations could provide experimental
+tasks). Our method is calibrated for fMRI sessions of few minutes. Even if experimental manipulations could provide
 tasks with longer time scales, an improvement of the method is necessary to allow the use of very short recording sessions.
-The main limitation of the method is related to the estimation of EC. Indeed the estimation procedure relies on the calculation of
+The main limitation of the method in this respect is related to the estimation of EC. Indeed the estimation procedure relies on the calculation of
 the correlation matrix. However when the number of ROIs is in the same order of the number of time points the correlation matrix will be
-very noisy (not to mention the case when there are more ROIs than time points, for which the correlation matrix becomes singular).
+very noisy (not to mention the case when there are more ROIs than time points,
+for which the correlation matrix becomes singular) and, as a consequence not
+reliable for the identification of subjects and conditions.
 Regularization is usually the solution to this type of problems, i.e. the pruning of the number of ROIs in this case.
 Another approach, the one that we are currently following, is that of a Bayesian estimation of the EC. The Bayesian setting allows the use of
 a prior probability on the EC that acts as a regularizer and allows a more robust estimation even when the number of time points is limited.
+The Bayesian approach allows also the estimation of the probability distribution of all parameters, through the so called Bayesian inference.
+This would allow in turn to test if a given connection exist or not thereby providing a more reliable estimation.
+
+The clinical domain might also require some adjustments to the pipeline. We tested our method with behavioral conditions but the noise distribution
+in clinical conditions might be different. The use of PCA, maybe with a small number of principal components, should be evaluated in this case.
+In addition the use of non-linear classifiers could be beneficial and will be evaluated for each dataset.
+
+\bibliographystyle{unsrt}
+\bibliography{bib_methods.bib}
 
 \end{document}
