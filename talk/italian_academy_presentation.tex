@@ -5,15 +5,15 @@
 \graphicspath{{figures/}}
 
 \newcommand{\comment}[1]{}
+\definecolor{grigio}{rgb}{.8, .8, .8}
 
 \mode<beamer>{%
 	\usetheme{Madrid}
   \usecolortheme{beaver}
 }
-\titlegraphic{\includegraphics[width=0.6\textwidth]{LogoUPF_CBC}}
+\titlegraphic{\includegraphics[width=0.3\textwidth]{LogoUPF_CBC}\hspace{0.5cm}\includegraphics[width=0.3\textwidth]{logo_italian_academy}\hspace{0.5cm}\includegraphics[width=0.3\textwidth]{ctn_columbia}}
 \title[Italian Academy]{\textbf{The topology of mental states.}\\ Combining data science and graph theory to reveal neural networks for cognitive functions.}
 \author{Andrea Insabato}
-\institute[]{Universitat Pompeu Fabra \\\vspace{1cm} Italian Academy for Advanced Studies, Columbia University}
 \date{November 1st, 2017}
 
 \begin{document}
@@ -123,204 +123,179 @@ using data science tools
 \end{frame}
 
 \begin{frame}
-\frametitle{Reduction of ANN to two-equations rate model}
+\frametitle{Subjects classification: EC as fingerprint}
 \begin{center}
-\includegraphics[width=0.9\columnwidth]{ANN_reduction1}
-\end{center}
-\vspace{1cm}
-\tiny{Wong \& Wang (2006)}
-\end{frame}
-
-\begin{frame}
-\frametitle{Reduction of ANN to two-equations rate model}
-\begin{center}
-\includegraphics[width=0.9\columnwidth]{ANN_reduction2}
-\end{center}
-\vspace{1cm}
-\tiny{Wong \& Wang (2006)}
-\end{frame}
-
-\begin{frame}
-\frametitle{Reduction of ANN to two-equations rate model}
-\begin{center}
-\includegraphics[width=0.9\columnwidth]{ANN_reduction}
-\end{center}
-\vspace{1cm}
-\tiny{Wong \& Wang (2006)}
-\end{frame}
-
-\begin{frame}
-\frametitle{confidence in ANN}
-\begin{columns}
-\begin{column}{0.5\textwidth}
-\begin{center}
-\includegraphics<1->[width=0.9\columnwidth]{decision_confidence_network_small}
-\end{center}
-\vspace{1cm}
-\tiny{Insabato et al. (2010)}
-\end{column}
-\begin{column}{0.5\textwidth}
-\includegraphics<2>[width=0.9\columnwidth]{confdm_intime_rateraster2}
-\end{column}
-\end{columns}
-\end{frame}
-
-\begin{frame}
-\frametitle{Vox populi}
-\begin{columns}
-\begin{column}{0.5\textwidth}
-Galton visits a livestock fair
-\begin{center}
-\includegraphics<1->[width=0.9\columnwidth]{galton}
-\end{center}
-\end{column}
-\begin{column}{0.5\textwidth}
-			\pause
-	\begin{itemize}
-		\item 800 guesses 
-			\pause
-		\item mean of the guesses: 1198 pounds
-			\pause
-		\item weigth of the ox: 1198 pounds
-	\end{itemize}
-\end{column}
-\end{columns}
-\end{frame}
-
-\begin{frame}
-\frametitle{An ensamble attractor model for decision and confidence}
-\pause
-\begin{center}
-\includegraphics[width=0.9\columnwidth]{fig1}
-\end{center}
-\vspace{1cm}
-\tiny{Paz et al. (2016)}
-\end{frame}
-
-\begin{frame}
-\frametitle{Dependence of model behavior on IC}
-\begin{center}
-\includegraphics[width=0.8\columnwidth]{fig2}
-\end{center}
-\vspace{1cm}
-\tiny{Paz et al. (2016)}
-\end{frame}
-
-\begin{frame}
-\frametitle{Estimation of $\sigma_{dv}$}
-\pause
-\begin{center}
-\includegraphics[width=0.8\columnwidth]{fig3_1}
-\end{center}
-\vspace{1cm}
-\tiny{Paz et al. (2016)}
-\end{frame}
-
-\begin{frame}
-\frametitle{Estimation of $\sigma_{dv}$}
-\begin{center}
-\includegraphics<1>[width=0.6\columnwidth]{threshold}
+\includegraphics<1>[width=0.7\columnwidth]{fingerprint}
 \transdissolve
-\includegraphics<2>[width=0.8\columnwidth]{full_model}
+\includegraphics<2>[width=0.65\columnwidth]{pipeline}
 \end{center}
-\vspace{1cm}
-\tiny{Lo \& Wang (2006)}
 \end{frame}
 
 \begin{frame}
-\frametitle{Estimation of $\sigma_{dv}$}
-\begin{center}
-\includegraphics[width=0.8\columnwidth]{fig3}
-\end{center}
-\vspace{1cm}
-\tiny{Paz et al. (2016)}
-\end{frame}
-
-\begin{frame}
-\frametitle{Fixed duration experiment}
+\transdissolve
+\frametitle{The problem and subproblems}
 \begin{itemize}
-		\pause
-	\item Accuracy increases as a function of stimulus duration
-		\pause
-	\item Confidence increases as a function of stimulus duration 
+	\item Characterization of brain networks underlying ``mental'' states 
+using data science tools
+	\begin{itemize}
+		\item \alert<2->{classify individuals}
+		\item \color<2>{grigio}{classify conditions} 
+		\item \color<2>{grigio}{extract networks underlying each classification}
+	\end{itemize}
 \end{itemize}
-\pause
-\begin{center}
-\includegraphics[width=0.8\columnwidth]{fixed_duration}
-\end{center}
-\vspace{1cm}
-\tiny{Paz et al. (2016)}
 \end{frame}
 
 \begin{frame}
-\frametitle{Asymmetric confidence kernels}
+\frametitle{Subjects classification}
 \begin{center}
-\includegraphics[width=0.6\columnwidth]{fig5}
+\includegraphics<1>[width=0.9\columnwidth]{class_subj}
 \end{center}
-\vspace{1cm}
-\tiny{Paz et al. (2016)}
 \end{frame}
 
 \begin{frame}
-\frametitle{Asymmetric impact of fluctuations}
+\frametitle{The classifier}
 \begin{center}
-\includegraphics[width=0.8\columnwidth]{fig4}
+\includegraphics<2>[width=0.6\columnwidth]{regression3}
+\includegraphics<3>[width=0.6\columnwidth]{regression2}
+\includegraphics<4>[width=0.6\columnwidth]{regression1}
+\includegraphics<5>[width=0.6\columnwidth]{regression0}
+\includegraphics<6>[width=0.6\columnwidth]{regression-1}
+\includegraphics<7>[width=0.6\columnwidth]{regression4}
 \end{center}
-\vspace{1cm}
-\tiny{Paz et al. (2016)}
 \end{frame}
 
 \begin{frame}
-\frametitle{Reproduction of experimental findings}
+\frametitle{Subjects network}
 \begin{center}
-\includegraphics[width=0.9\columnwidth]{fig6}
+\includegraphics<1>[width=0.8\columnwidth]{subj_varying_links}
 \end{center}
-\vspace{1cm}
-\tiny{Paz et al. (2016)}
+\end{frame}
+
+\begin{frame}
+\frametitle{Subjects network}
+\begin{center}
+\includegraphics<1>[width=0.8\columnwidth]{subj_net}
+\end{center}
+\end{frame}
+
+\begin{frame}
+\frametitle{Agreement between datasets}
+\begin{center}
+\includegraphics<1>[width=0.9\columnwidth]{avg_ranking_subsystems}
+\end{center}
+\end{frame}
+
+\begin{frame}
+\frametitle{Agreement between datasets}
+\begin{center}
+\includegraphics<1>[width=0.6\columnwidth]{subj_H0}
+\end{center}
+\end{frame}
+
+\begin{frame}
+\transdissolve
+\frametitle{The problem and subproblems}
+\begin{itemize}
+	\item Characterization of brain networks underlying ``mental'' states 
+using data science tools
+	\begin{itemize}
+		\item \color<2>{grigio}{classify individuals}
+		\item \alert<2>{classify conditions} 
+		\item \color<2>{grigio}{extract networks underlying each classification}
+	\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Simultaneous classification: subjects and conditions}
+\begin{center}
+\includegraphics[width=0.6\columnwidth]{noise_mixture0}
+\end{center}
+\end{frame}
+
+\begin{frame}
+\frametitle{Simultaneous classification: subjects and conditions}
+\begin{center}
+\includegraphics<1>[width=0.6\columnwidth]{subj_cond_idea}
+\end{center}
+\end{frame}
+
+\begin{frame}
+\frametitle{Simultaneous classification: subjects and conditions}
+\begin{center}
+\includegraphics<1>[width=0.6\columnwidth]{subj_cond_results}
+\end{center}
+\end{frame}
+
+\begin{frame}
+\frametitle{Simultaneous classification: subjects and conditions}
+\begin{center}
+\includegraphics<1>[width=0.6\columnwidth]{subj_cond_matrix}
+\end{center}
+\end{frame}
+
+\begin{frame}
+\frametitle{Simultaneous classification: subjects and conditions}
+\begin{center}
+\includegraphics<1>[width=0.6\columnwidth]{cond_H0}
+\end{center}
+\end{frame}
+
+\begin{frame}
+\frametitle{Simultaneous classification: subjects and conditions}
+\begin{center}
+\includegraphics<1>[width=0.7\columnwidth]{fig5}
+\end{center}
 \end{frame}
 
 \begin{frame}
 \frametitle{Summary}
-\begin{enumerate}
-	\item Confidence can be estimated from the dispersion of modules in an ensamble network
-	\item Several experimental findings can be reproduced by this model:
-		\begin{itemize}
-			\item Confidence is higher for easier stimuli
-			\item Confidence decreases as a function of RT 
-			\item Choice accuracy and confidence are positively related
-			\item Confidence increases as a function of time in fixed duration experiments
-			\item Asymmetric confidence kernels
-		\end{itemize}
-\end{enumerate}
+\begin{itemize}
+	\item Characterization of brain networks underlying ``mental'' states 
+using data science tools
+	\begin{itemize}
+		\item {\color<2->{green}classify individuals}
+		\item {\color<3->{green}classify conditions}
+		\item \color<4->{green}extract networks underlying each classification
+	\end{itemize}
+\item \uncover<5->{Refinements: small samples \uncover<6>{$\rightarrow$ Bayesian inference}}
+\end{itemize}
 \end{frame}
-
-%\begin{frame}
-%\frametitle{}
-%\onslide<1>confidence $\rigthwordarrow$ metacognition
-%\onslide<2>\color{gray}{(confidence $\rigthwordarrow$ metacognition)}
-%\end{frame}
 
 \begin{frame}
 \frametitle{Acknowledgments}
 \begin{columns}
 \begin{column}{0.5\textwidth}
 \begin{center}
-Luciano Paz\\
+Vicente Pallares\\
 \vspace{1cm}
 
-Ariel Zylberberg\\
+Matthieu Gilson\\
 \vspace{1cm}
 
-Gustavo Deco\\
-\vspace{1cm}
+\small Ana Sanjuan\\
+\vspace{0.5cm}
 
-Mariano Sigman
+\small Simone Kuhn\\
+\vspace{0.5cm}
+
+\small Dante Mantini\\
+\vspace{0.5cm}
+
+\small Gustavo Deco\\
 \end{center}
 \end{column}
 \begin{column}{0.5\textwidth}
 %\includegraphics[width=0.2\columnwidth,valign=t]{luciano.jpg}
 \end{column}
 \end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{}
+\begin{center}
+\includegraphics<1>[width=0.6\columnwidth]{minion}
+\end{center}
 \end{frame}
 
 
